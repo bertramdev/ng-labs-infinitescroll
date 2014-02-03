@@ -1,6 +1,6 @@
 angular.module('labs.infiniteScroll', []);
 
-angular.module('labs.infiniteScroll', directive('infiniteScroll', [
+angular.module('labs.infiniteScroll').directive('infiniteScroll', [
 	'$rootScope', '$timeout', function($rootScope, $timeout) {
 		return {
 			link: function(scope, elem, attrs) {
