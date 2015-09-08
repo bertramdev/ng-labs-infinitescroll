@@ -27,7 +27,7 @@ angular.module('labs.infiniteScroll', []).directive('infiniteScroll', [
 
 				fetchItems = (function() {
 					return $parse(attrs.infiniteScroll).bind(null, scope);
-				});
+				})();
 
 				handler = function() {
 					var viewBottom = elem.scrollTop() + elem.height();
