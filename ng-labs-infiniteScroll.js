@@ -1,6 +1,6 @@
 angular.module('labs.infiniteScroll', []).directive('infiniteScroll', [
-	'$rootScope', '$timeout', '$parse',
-	function($rootScope, $timeout, $parse) {
+	'$rootScope', '$timeout', '$parse', '$window', '$document',
+	function($rootScope, $timeout, $parse, $window, $document) {
 		return {
 			link: function(scope, elem, attrs) {
 				var checkWhenEnabled, handler, scrollDistance, scrollEnabled, fetchItems;
@@ -29,9 +29,11 @@ angular.module('labs.infiniteScroll', []).directive('infiniteScroll', [
 					return $parse(attrs.infiniteScroll).bind(null, scope);
 				})();
 
+				var target;
+
 				handler = function() {
-					var viewBottom = elem.scrollTop() + elem.height();
-					var remaining = elem[0].scrollHeight - viewBottom;
+					var viewBottom = target.scrollTop() + target.height();
+					var remaining = (target[0] === $window ? $document[0].body.scrollHeight : target[0].scrollHeight) - viewBottom;
 					var shouldScroll = remaining <= scrollDistance;
 
 					if (shouldScroll && scrollEnabled) {
@@ -41,9 +43,27 @@ angular.module('labs.infiniteScroll', []).directive('infiniteScroll', [
 					}
 				};
 
-				elem.on('scroll', handler);
+				if (attrs.infiniteScrollContainer) {
+					target = attrs.infiniteScrollContainer;
+
+					if (target === 'window') {
+						target = angular.element($window);
+					} else if (target === 'document') {
+						target = $document;
+					} else if (target === 'body') {
+						target = angular.element($document[0].body);
+					} else {
+						target = angular.element(target);
+					}
+				}
+
+				if (!target) {
+					target = elem;
+				}
+
+				target.on('scroll', handler);
 				scope.$on('$destroy', function() {
-					return elem.off('scroll', handler);
+					return target.off('scroll', handler);
 				});
 
 				return $timeout((function() {
